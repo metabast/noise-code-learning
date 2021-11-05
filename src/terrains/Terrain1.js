@@ -82,8 +82,8 @@ geometry.attributes.position.needUpdate = true;
 // plane.scale.set(10,10,10);
 
 
-function Noise1(scene){
+function Terrain1(scene){
     scene.add( plane );
 }
 
-export default Noise1;
+export default Terrain1;

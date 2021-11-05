@@ -6,7 +6,7 @@
 <script>
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import Noise1 from '../noise3d/Noise1.js'
+import Terrain1 from '../terrains/Terrain1.js'
 export default {
 
   name: 'Scene',
@@ -39,7 +39,7 @@ export default {
     directionalLight.translateY(4)
     // scene.add(directionalLight);
 
-    new Noise1(scene);
+    new Terrain1(scene);
 
     function animate() {
       requestAnimationFrame( animate );
