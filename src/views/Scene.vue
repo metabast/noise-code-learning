@@ -19,16 +19,16 @@ export default {
 
   mounted(){
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 100000 );
 
-    const renderer = new THREE.WebGLRenderer({antialias: true});
+    const renderer = new THREE.WebGLRenderer({antialias: false});
     renderer.setSize( window.innerWidth, window.innerHeight );
     this.$refs.scene.appendChild( renderer.domElement );
 
 
     const controls = new OrbitControls(camera, renderer.domElement);
 
-    const camDist = 5;
+    const camDist = 1;
     camera.position.set(camDist,camDist,camDist);
 
     controls.update();
