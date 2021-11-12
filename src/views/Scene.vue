@@ -35,7 +35,7 @@ export default {
 
     controls.update();
 
-    scene.add(new THREE.AxesHelper(1))
+    scene.add(new THREE.AxesHelper(.25))
 
     const directionalLight = new THREE.PointLight( 0xffffff, 1 );
     directionalLight.translateY(4)

@@ -29,7 +29,7 @@ noise1.SetFractalWeightedStrength(0.5);// default .5
 
 let noise2 = new FastNoiseLite(4);
 noise2.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-noise2.SetFrequency(2.9);
+noise2.SetFrequency(2.0);
 
 let noise3 = new FastNoiseLite(10);
 noise3.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
@@ -37,13 +37,23 @@ noise3.SetFrequency(0.6);
 noise3.SetFractalType(FastNoiseLite.FractalType.FBm);
 noise3.SetFractalOctaves(7.0);// default 3
 noise3.SetFractalLacunarity(1.9);// default 2
-noise3.SetFractalGain(0.5);// default .5
+noise3.SetFractalGain(0.2);// default .5
 
+let noise4 = new FastNoiseLite(15);
+noise4.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+noise4.SetFrequency(9.0);
+noise4.SetFractalType(FastNoiseLite.FractalType.FBm);
+noise4.SetFractalOctaves(3.0);// default 3
+noise4.SetFractalLacunarity(3.0);// default 2
+noise4.SetFractalGain(1.0);// default .5
+noise4.SetFractalWeightedStrength(0.8);// default .5
+noise4.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2);
+noise4.SetDomainWarpAmp(2.0);// default 1.0
 
 
 
 const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, flatShading: true, shininess:0.0, transparent: true  } );
-const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe:true, transparent: true, opacity: 0.1 } );
+const materialWireframe = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true, transparent: true, opacity: 0.1 } );
 
 const subdivisions = 1000;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
@@ -54,7 +64,7 @@ geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( cou
 const plane = new THREE.Mesh( geometry, material );
 const wireframe = new THREE.Mesh( geometry, materialWireframe );
 wireframe.position.z += .001
-// plane.add(wireframe);
+plane.add(wireframe);
 plane.rotateX(-90*(Math.PI/180));
 const color = new THREE.Color();
 const colors = geometry.attributes.color;
@@ -85,8 +95,8 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     let rg = pow( min( cos(PI * pln / 2.0), 1.0 - abs(pln)), 3.0 );
 
     let noiseVal = rg;
+    let ly = range(0, 1, 0, 1, rg);
 
-    // let ly = range(0, 1, 0, 2, rg);
     // noiseVal = lerp( 0, noise3.GetNoise(p.x,p.y), ly);
 
     noiseVal = noise1.GetNoise(p.x, p.y);
@@ -101,10 +111,22 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     let noiseVal3 = noise3.GetNoise(p.x, p.y);
     noiseVal3 = range(-1.0, 1.0, -1.0, 1.0, noiseVal3);
 
+    let noiseVal4 = noise4.GetNoise(p.x, p.y);
+    noiseVal4 = range(-1.0, 1.0, 0, .25, noiseVal4);
 
-    fn = noiseVal;
+    fn = rg*0.6;
+    fn += noiseVal*0.9+0.35;
     fn += noiseVal2*0.6;
-    fn *= 1-noiseVal3*0.9;
+
+
+    fn += noiseVal4;
+    // fn *= 1-noiseVal3*0.9;
+
+    // fn = lerp( 0, fn, ly);
+
+
+
+    // fn = noiseVal;
 
     // fn += noiseVal3 *1.41;
 
