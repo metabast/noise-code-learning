@@ -19,10 +19,12 @@ export default {
 
   mounted(){
     const scene = new THREE.Scene();
+    // scene.background = new THREE.Color(0xff0000);
     const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.01, 100000 );
 
     const renderer = new THREE.WebGLRenderer({antialias: false});
     renderer.setSize( window.innerWidth, window.innerHeight );
+    // renderer.setClearColorHex( 0xff00ff, 1);
     this.$refs.scene.appendChild( renderer.domElement );
 
 
@@ -52,6 +54,6 @@ export default {
 
 <style lang="css" scoped>
   #scene canvas{
-    background-color: #CCC;
+    background-color: #FF0000;
   }
 </style>
