@@ -3185,7 +3185,7 @@ export default class FastNoiseLite {
     }
 }
 
-class Vector2 {
+export class Vector2 {
     /**
      * 2d Vector
      * @param {number} x
@@ -3197,7 +3197,7 @@ class Vector2 {
     }
 }
 
-class Vector3 {
+export class Vector3 {
     /**
      * 3d Vector
      * @param {number} x
