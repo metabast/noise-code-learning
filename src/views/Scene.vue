@@ -31,11 +31,11 @@ export default {
     const controls = new OrbitControls(camera, renderer.domElement);
 
     const camDist = 1;
-    camera.position.set(camDist,camDist,camDist);
+    camera.position.set( camDist, camDist, camDist);
 
     controls.update();
 
-    scene.add(new THREE.AxesHelper(.25))
+    // scene.add(new THREE.AxesHelper(.25))
 
     const directionalLight = new THREE.PointLight( 0xffffff, 1 );
     directionalLight.translateY(4)

@@ -18,7 +18,8 @@ const ceil = Math.ceil;
 
 
 import FastNoiseLite from "../vendors/FastNoiseLite.js";
-let noise1 = new FastNoiseLite(1);
+
+let noise1 = new FastNoiseLite(6);
 noise1.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
 noise1.SetFrequency(1.0);
 noise1.SetFractalType(FastNoiseLite.FractalType.FBm);
@@ -39,21 +40,38 @@ noise3.SetFractalOctaves(7.0);// default 3
 noise3.SetFractalLacunarity(1.9);// default 2
 noise3.SetFractalGain(0.2);// default .5
 
-let noise4 = new FastNoiseLite(15);
+
+let noise4 = new FastNoiseLite(16);
 noise4.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
-noise4.SetFrequency(9.0);
+noise4.SetFrequency(3.0);
 noise4.SetFractalType(FastNoiseLite.FractalType.FBm);
-noise4.SetFractalOctaves(3.0);// default 3
-noise4.SetFractalLacunarity(3.0);// default 2
-noise4.SetFractalGain(1.0);// default .5
-noise4.SetFractalWeightedStrength(0.8);// default .5
-noise4.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2);
-noise4.SetDomainWarpAmp(2.0);// default 1.0
+noise4.SetFractalOctaves(2.0);// default 3
+noise4.SetFractalLacunarity(2.0);// default 2
+noise4.SetFractalGain(0.5);// default .5
+noise4.SetFractalWeightedStrength(0.4);// default .5
+
+let noiseDomainWarp = new FastNoiseLite(15);
+noiseDomainWarp.SetNoiseType(FastNoiseLite.NoiseType.Cellular);
+noiseDomainWarp.SetFrequency(0.4);
+noiseDomainWarp.SetFractalType(FastNoiseLite.FractalType.FBm);
+noiseDomainWarp.SetFractalOctaves(3.0);// default 3
+noiseDomainWarp.SetFractalLacunarity(2.0);// default 2
+noiseDomainWarp.SetFractalGain(0.5);// default .5
+noiseDomainWarp.SetFractalWeightedStrength(0.4);// default .5
+noiseDomainWarp.SetDomainWarpType(FastNoiseLite.DomainWarpType.OpenSimplex2);
+noiseDomainWarp.SetDomainWarpAmp(2.0);// default 1.0
+
+import {Vector2} from "../vendors/FastNoiseLite.js";
+
+// let coord = new Vector2(.435121, .32516);
+// clog(noise4.GetNoise(.435121, .32516));
+// noise4.DomainWrap(coord)
+// clog(noise4.GetNoise(coord.x, coord.y));
 
 
 
 const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, flatShading: true, shininess:0.0, transparent: true  } );
-const materialWireframe = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true, transparent: true, opacity: 0.1 } );
+const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe:true, transparent: true, opacity: 0.1 } );
 
 const subdivisions = 1000;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
@@ -94,33 +112,37 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     // radial gradient
     let rg = pow( min( cos(PI * pln / 2.0), 1.0 - abs(pln)), 3.0 );
 
-    let noiseVal = rg;
-    let ly = range(0, 1, 0, 1, rg);
+    let ly = range(0, 1, -0.5, 1.0, rg);
 
     // noiseVal = lerp( 0, noise3.GetNoise(p.x,p.y), ly);
+    let c = new Vector2(p.x, p.y);
 
-    noiseVal = noise1.GetNoise(p.x, p.y);
+    let noiseVal = noise1.GetNoise(c.x, c.y);
     noiseVal = range(-1.0, 1.0, -1.0, 1.0, noiseVal);
 
-    let noiseVal2 = noise2.GetNoise(p.x, p.y);
+    let noiseVal2 = noise2.GetNoise(c.x, c.y);
     noiseVal2 = range(-1.0, 1.0, -1.0, 1.0, noiseVal2)*.1;
 
     // fn = noiseVal2;
     // fn += noiseVal;
 
-    let noiseVal3 = noise3.GetNoise(p.x, p.y);
+    let noiseVal3 = noise3.GetNoise(c.x, c.y);
     noiseVal3 = range(-1.0, 1.0, -1.0, 1.0, noiseVal3);
 
-    let noiseVal4 = noise4.GetNoise(p.x, p.y);
-    noiseVal4 = range(-1.0, 1.0, 0, .25, noiseVal4);
+    noiseDomainWarp.DomainWrap(c);
+    let noiseVal4 = noise4.GetNoise(c.x, c.y);
+    noiseVal4 = range(-1.0, 1.0, 0, 1, noiseVal4);
 
-    fn = rg*0.6;
+    // fn = rg*1.0;
+    fn = 0;
     fn += noiseVal*0.9+0.35;
     fn += noiseVal2*0.6;
+    fn += noiseVal4*1.0;
 
+    fn = lerp( 0.0, fn, ly);
 
-    fn += noiseVal4;
-    // fn *= 1-noiseVal3*0.9;
+    // fn = noiseVal4;
+
 
     // fn = lerp( 0, fn, ly);
 
@@ -150,22 +172,22 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     // let colorZ = clamp(noiseVal, -1, 1);
     let colorZ = range(-1.0, 1.0, 0.0, 1.0, posZ);
 
-    if(colorZ <= 0.005)
-        colors.setXYZ((i/3), 0.05,0.2,0.3);
-    else if(colorZ <=0.05){
+    if(colorZ <= 0.511)
+        colors.setXYZW((i/3), 0.05,0.2,0.3, 1);
+    else if(colorZ <= 0.52){
         color.setHex(0xD7D7A5);
-        colors.setXYZ((i/3), color.r, color.g, color.b);
+        colors.setXYZW((i/3), color.r, color.g, color.b, 1);
     }
-    else if(colorZ <=0.14){
+    else if(colorZ <= 0.54){
         color.setHex(0x68A467);
-        colors.setXYZ((i/3), color.r, color.g, color.b);
+        colors.setXYZW((i/3), color.r, color.g, color.b, 1);
     }
-    else if(colorZ >=0.5){
+    else if(colorZ >=0.61){
         color.setHex(0xFCFCFC);
-        colors.setXYZ((i/3), color.r, color.g, color.b);
+        colors.setXYZW((i/3), color.r, color.g, color.b, 1);
     }
     else
-        colors.setXYZ((i/3), colorZ, colorZ, colorZ);
+        colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
 
     colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
     // color.setHSL(1*((i/3+2)/geometry.attributes.position.count), 1, .5);
