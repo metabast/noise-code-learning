@@ -69,11 +69,17 @@ import {Vector2} from "../vendors/FastNoiseLite.js";
 // clog(noise4.GetNoise(coord.x, coord.y));
 
 
+const texture = new THREE.TextureLoader().load( "/textures/uv_checker01.png" );
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set( 4, 4 );
 
-const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, flatShading: true, shininess:0.0, transparent: true  } );
+// const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, flatShading: true, shininess:0.0, transparent: true  } );
+const material = new THREE.MeshBasicMaterial( { flatShading: true, shininess:0.0, transparent: true  } );
+material.map = texture;
 const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe:true, transparent: true, opacity: 0.1 } );
 
-const subdivisions = 1000;
+const subdivisions = 200;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
 const count = geometry.attributes.position.count;
 
@@ -82,7 +88,7 @@ geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( cou
 const plane = new THREE.Mesh( geometry, material );
 const wireframe = new THREE.Mesh( geometry, materialWireframe );
 wireframe.position.z += .001
-plane.add(wireframe);
+// plane.add(wireframe);
 plane.rotateX(-90*(Math.PI/180));
 const color = new THREE.Color();
 const colors = geometry.attributes.color;
@@ -98,7 +104,7 @@ function ring(st, r1, r2, x=0, y=0, sc=1){
     r2 *= sc;
     let r = range(r1, r1-0.005, -1, 1.0, st.length());
     r -= range(r2, r2-0.005, -1, 1.0, st.length());
-    r = range(0,1, -1, 0.1, r);
+    r = range(0,1, -.1, 0.1, r);
     return r
 }
 
