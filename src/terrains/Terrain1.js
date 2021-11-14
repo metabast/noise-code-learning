@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { VertexNormalsHelper } from 'three/examples/jsm/helpers/VertexNormalsHelper.js';
+import { VertexTangentsHelper } from 'three/examples/jsm/helpers/VertexTangentsHelper.js';
 window.THREE = THREE;
 
 const clog = (...params)=> console.log(...params);
@@ -74,10 +76,12 @@ texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set( 4, 4 );
 
-// const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, flatShading: true, shininess:0.0, transparent: true  } );
-const material = new THREE.MeshBasicMaterial( { flatShading: true, shininess:0.0, transparent: true  } );
-material.map = texture;
-const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe:true, transparent: true, opacity: 0.1 } );
+const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, transparent: true  } );
+// const material = new THREE.MeshBasicMaterial( { flatShading: true, shininess:0.0, transparent: true  } );
+// material.map = texture;
+const slopeMaterial = new THREE.MeshBasicMaterial( { color: 0x40353F, vertexColors: true, transparent: true, opacity: 1.0  } );
+
+const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFF00F0, wireframe:true, transparent: true, opacity: 1.0 } );
 
 const subdivisions = 200;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
@@ -85,11 +89,12 @@ const count = geometry.attributes.position.count;
 
 geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( count * 4 ), 4 ) );
 
-const plane = new THREE.Mesh( geometry, material );
+const plane = new THREE.Mesh( geometry, [material,slopeMaterial] );
 const wireframe = new THREE.Mesh( geometry, materialWireframe );
 wireframe.position.z += .001
 // plane.add(wireframe);
 plane.rotateX(-90*(Math.PI/180));
+
 const color = new THREE.Color();
 const colors = geometry.attributes.color;
 
@@ -107,7 +112,8 @@ function ring(st, r1, r2, x=0, y=0, sc=1){
     r = range(0,1, -.1, 0.1, r);
     return r
 }
-
+geometry.addGroup(0, subdivisions*subdivisions*2*3, 0);
+// geometry.addGroup(0, (subdivisions*subdivisions*2*3), 1);
 for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     //final noise
     let fn = 0;
@@ -139,13 +145,13 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     let noiseVal4 = noise4.GetNoise(c.x, c.y);
     noiseVal4 = range(-1.0, 1.0, 0, 1, noiseVal4);
 
-    // fn = rg*1.0;
-    fn = 0;
+    fn = rg*0.5;
+    // fn = 0;
     fn += noiseVal*0.9+0.35;
     fn += noiseVal2*0.6;
-    fn += noiseVal4*1.0;
+    fn += noiseVal4*0.4;
 
-    fn = lerp( 0.0, fn, ly);
+    // fn = lerp( 0.0, fn, ly);
 
     // fn = noiseVal4;
 
@@ -196,18 +202,61 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
         colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
 
     colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
-    // color.setHSL(1*((i/3+2)/geometry.attributes.position.count), 1, .5);
-    // colors.setXYZ((i/3)+2, color.r, color.g, color.b);
 }
 
 geometry.attributes.position.needUpdate = true;
+geometry.computeVertexNormals();
+// geometry.computeTangents();
 
+let createGroupMaterial = false;
+if(createGroupMaterial){
+
+    let normals = geometry.attributes.normal.array;
+    let vertices = geometry.attributes.position.array;
+    let geomIndexes = geometry.index.array
+    let pn = new THREE.Vector3(0,0,1);
+
+    for(let i=0; i< geomIndexes.length; i+=3){
+
+        //Polygons vertices
+        let geomIndex = geomIndexes[i]*3;
+        let v1 = new THREE.Vector3( vertices[geomIndex], vertices[geomIndex+1], vertices[geomIndex+2] );
+
+        geomIndex = geomIndexes[i+1]*3;
+        let v2 = new THREE.Vector3( vertices[geomIndex], vertices[geomIndex+1], vertices[geomIndex+2] );
+
+        geomIndex = geomIndexes[i+2]*3;
+        let v3 = new THREE.Vector3( vertices[geomIndex], vertices[geomIndex+1], vertices[geomIndex+2] );
+
+
+        // Calculate face normal
+        let a = v2.clone().sub( v1.clone() );
+        let b = v3.clone().sub( v2.clone() );
+
+        let r = a.clone().cross( b.clone() );
+
+        // Use angle for creating group
+        let angle = r.angleTo(pn)*(180/PI);
+        
+        if(angle > 25){
+            geometry.addGroup(i, 3, 1);
+        }else{
+            // geometry.addGroup(i, 3, 0);
+        }
+    }
+}
+
+
+// const normalHelper = new VertexNormalsHelper( plane, 0.01, 0x00ff00, 1 );
+// const tangentHelper = new VertexTangentsHelper( plane, 0.03, 0x006CFF, 1 );
 
 // plane.scale.set(10,10,10);
 
 
 function Terrain1(scene){
     scene.add( plane );
+    // scene.add( normalHelper );
+    // scene.add( tangentHelper );
 }
 
 export default Terrain1;
