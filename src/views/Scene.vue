@@ -39,7 +39,7 @@ export default {
 
     const directionalLight = new THREE.PointLight( 0xffffff, 1 );
     directionalLight.translateY(4)
-    // scene.add(directionalLight);
+    scene.add(directionalLight);
 
     new Terrain1(scene);
 

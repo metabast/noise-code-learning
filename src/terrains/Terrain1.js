@@ -74,7 +74,7 @@ import {Vector2} from "../vendors/FastNoiseLite.js";
 const texture = new THREE.TextureLoader().load( "/textures/uv_checker01.png" );
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set( 4, 4 );
+texture.repeat.set( 4, 4 ); //useless for shaderMaterial
 
 const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: true, transparent: true  } );
 // const material = new THREE.MeshBasicMaterial( { flatShading: true, shininess:0.0, transparent: true  } );
@@ -83,13 +83,28 @@ const slopeMaterial = new THREE.MeshBasicMaterial( { color: 0x40353F, vertexColo
 
 const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFF00F0, wireframe:true, transparent: true, opacity: 1.0 } );
 
+// SHADER
+import vertexShader from './shaders/terrain1/vertex.glsl';
+import fragmentShader from './shaders/terrain1/fragment.glsl';
+const matShader = new THREE.ShaderMaterial({
+    uniforms: {
+        "time": {value: 1.0},
+        "resolution": { value: new THREE.Vector2()},
+        "uvScale": { value: new THREE.Vector2( 4.0, 4.0 ) },
+        "texture1": { value: texture},
+    },
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    transparent: true,
+})
+
 const subdivisions = 200;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
 const count = geometry.attributes.position.count;
 
 geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( count * 4 ), 4 ) );
 
-const plane = new THREE.Mesh( geometry, [material,slopeMaterial] );
+const plane = new THREE.Mesh( geometry, [matShader, material, slopeMaterial] );
 const wireframe = new THREE.Mesh( geometry, materialWireframe );
 wireframe.position.z += .001
 // plane.add(wireframe);
