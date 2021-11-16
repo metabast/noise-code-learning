@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Terrain1 from '../terrains/Terrain1.js'
+import Exercice1 from '../exercices/Exercice1.js'
 export default {
 
   name: 'Scene',
@@ -30,18 +31,19 @@ export default {
 
     const controls = new OrbitControls(camera, renderer.domElement);
 
-    const camDist = 1.2;
-    camera.position.set( camDist, camDist, camDist);
+    const camDist = 2;
+    camera.position.set( 0, 0, camDist);
 
     controls.update();
 
-    scene.add(new THREE.AxesHelper(.25))
+    scene.add(new THREE.AxesHelper(1))
 
     const directionalLight = new THREE.PointLight( 0xffffff, 1 );
     directionalLight.translateY(4)
-    scene.add(directionalLight);
+    // scene.add(directionalLight);
 
-    new Terrain1(scene);
+    // new Terrain1(scene);
+    new Exercice1(scene);
 
     function animate() {
       requestAnimationFrame( animate );

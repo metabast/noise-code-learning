@@ -1,7 +1,7 @@
 import * as THREE from 'three';
+window.THREE = THREE;
 import { VertexNormalsHelper } from 'three/examples/jsm/helpers/VertexNormalsHelper.js';
 import { VertexTangentsHelper } from 'three/examples/jsm/helpers/VertexTangentsHelper.js';
-window.THREE = THREE;
 
 const clog = (...params)=> console.log(...params);
 const lerp = window.lerp = (x, y, t) => x * (1-t) + y * t;
