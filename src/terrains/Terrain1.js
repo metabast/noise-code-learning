@@ -81,22 +81,8 @@ const material = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, vertexColors: t
 // material.map = texture;
 const slopeMaterial = new THREE.MeshBasicMaterial( { color: 0x40353F, vertexColors: true, transparent: true, opacity: 1.0  } );
 
-const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFF00F0, wireframe:true, transparent: true, opacity: 1.0 } );
+const materialWireframe = new THREE.MeshBasicMaterial( { color: 0xFFFFFF, wireframe:true, transparent: true, opacity: 1.0 } );
 
-// SHADER
-import vertexShader from './shaders/terrain1/vertex.glsl';
-import fragmentShader from './shaders/terrain1/fragment.glsl';
-const matShader = new THREE.ShaderMaterial({
-    uniforms: {
-        "time": {value: 1.0},
-        "resolution": { value: new THREE.Vector2()},
-        "uvScale": { value: new THREE.Vector2( 4.0, 4.0 ) },
-        "texture1": { value: texture},
-    },
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    transparent: true,
-})
 
 const subdivisions = 200;
 const geometry = new THREE.PlaneGeometry( 2, 2 , subdivisions, subdivisions );
@@ -104,7 +90,7 @@ const count = geometry.attributes.position.count;
 
 geometry.setAttribute( 'color', new THREE.BufferAttribute( new Float32Array( count * 4 ), 4 ) );
 
-const plane = new THREE.Mesh( geometry, [matShader, material, slopeMaterial] );
+const plane = new THREE.Mesh( geometry, [material, slopeMaterial] );
 const wireframe = new THREE.Mesh( geometry, materialWireframe );
 wireframe.position.z += .001
 // plane.add(wireframe);
@@ -160,11 +146,12 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     let noiseVal4 = noise4.GetNoise(c.x, c.y);
     noiseVal4 = range(-1.0, 1.0, 0, 1, noiseVal4);
 
-    fn = rg*0.5;
+    fn = rg*0.4;
     // fn = 0;
-    fn += noiseVal*0.9+0.35;
-    fn += noiseVal2*0.6;
-    fn += noiseVal4*0.4;
+    // fn -= ring(p, 1, .4, 0.1, 0, .75)*0.2;
+    fn += noiseVal2*0.1;
+    fn += noiseVal4*0.5;
+    fn += noiseVal*0.7;
 
     // fn = lerp( 0.0, fn, ly);
 
@@ -197,7 +184,7 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     geometry.attributes.position.array[i+2] = posZ;
 
     // let colorZ = clamp(noiseVal, -1, 1);
-    let colorZ = range(-1.0, 1.0, 0.0, 1.0, posZ);
+    let colorZ = range(-0.3, 1.0, 0.0, 1.0, posZ);
 
     if(colorZ <= 0.511)
         colors.setXYZW((i/3), 0.05,0.2,0.3, 1);
@@ -216,7 +203,7 @@ for(let i=0; i< geometry.attributes.position.array.length; i+=3){
     else
         colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
 
-    colors.setXYZW((i/3), colorZ, colorZ, colorZ, 1);
+    colors.setXYZW((i/3), .5-colorZ, .5-colorZ, .5-colorZ, 1);
 }
 
 geometry.attributes.position.needUpdate = true;
@@ -261,6 +248,12 @@ if(createGroupMaterial){
     }
 }
 
+const clock = new THREE.Clock();
+
+function update(){
+    plane.rotateZ(.0005)
+}
+
 
 // const normalHelper = new VertexNormalsHelper( plane, 0.01, 0x00ff00, 1 );
 // const tangentHelper = new VertexTangentsHelper( plane, 0.03, 0x006CFF, 1 );
@@ -272,6 +265,9 @@ function Terrain1(scene){
     scene.add( plane );
     // scene.add( normalHelper );
     // scene.add( tangentHelper );
+    return {
+        update:update,
+    }
 }
 
 export default Terrain1;
